@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VoxCheck — Pronunciation Mistake Detector BY M.Adeeb Ali Softwer Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d0c;--card:#141816;--line:#252b28;--tx:#eef2ef;--mut:#856afa;--ac:#a724df;--ac-i:#0b0d0c;--ok:#b9ff66;--warn:#ffc94d;--bad:#ff6b6b;--ex:#7aa7ff;
+ box-sizing:border-box;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#f6dc59;--card:#fff;--line:#dfe6dc;--tx:#121714;--mut:#5d6b62;--ac:#3f8f00;--ac-i:#fff;--ok:#2f8a00;--warn:#b57a00;--bad:#d63b3b;--ex:#2d5fd0}}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.55 Inter,system-ui,sans-serif;min-height:100vh;background-image:radial-gradient(60rem 30rem at 80% -10%,color-mix(in oklab,var(--ac) 14%,transparent),transparent)}
+h1,h2,.num{font-family:'Space Grotesk',sans-serif}
+main{max-width:980px;margin:auto;padding:clamp(1rem,4vw,2.5rem);display:grid;gap:1.25rem}
+header{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+h1{font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em}h1 span{color:var(--ac)}
+.sub{color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:1.25rem;animation:rise .6s both}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1.25rem}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+@keyframes rise{from{opacity:0;translate:0 14px}}
+@keyframes pop{from{opacity:0;scale:.6}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--bad) 55%,transparent)}100%{box-shadow:0 0 0 24px transparent}}
+textarea,select{width:100%;background:transparent;color:inherit;border:1px solid var(--line);border-radius:14px;padding:.8rem 1rem;font:inherit;resize:vertical;transition:.25s}
+textarea:focus,select:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in oklab,var(--ac) 18%,transparent)}
+textarea{font-size:1.15rem;min-height:92px}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.75rem 0}
+button{font:500 .9rem Inter;color:var(--tx);background:transparent;border:1px solid var(--line);border-radius:999px;padding:.5rem .95rem;cursor:pointer;transition:.2s}
+button:hover{border-color:var(--ac);color:var(--ac);translate:0 -2px}
+.mic{width:84px;height:84px;border-radius:50%;background:var(--ac);color:var(--ac-i);border:0;font-size:2rem;display:grid;place-items:center;margin:auto}
+.mic:hover{color:var(--ac-i);scale:1.07}.mic.on{background:var(--bad);color:#fff;animation:pulse 1.2s infinite}
+canvas{width:100%;height:70px;display:block;margin-top:1rem}
+.ring{width:170px;margin:auto;display:block;rotate:-90deg}
+.ring circle{fill:none;stroke-width:12;stroke-linecap:round}
+.ring .bg{stroke:var(--line)}.ring .fg{stroke:var(--ac);stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1),stroke .4s}
+.score{position:relative;text-align:center}.score .num{position:absolute;inset:0;display:grid;place-items:center;font-size:2.8rem;font-weight:700}
+.verdict{text-align:center;margin-top:.5rem;font-weight:500}
+.words{display:flex;flex-wrap:wrap;gap:.5rem;font-size:1.25rem;margin:.5rem 0}
+.w{padding:.25rem .7rem;border-radius:10px;border:1px solid;animation:pop .35s calc(var(--i)*60ms) both;cursor:default}
+.ok{color:var(--ok);border-color:color-mix(in oklab,var(--ok) 40%,transparent);background:color-mix(in oklab,var(--ok) 10%,transparent)}
+.close{color:var(--warn);border-color:color-mix(in oklab,var(--warn) 45%,transparent);background:color-mix(in oklab,var(--warn) 10%,transparent)}
+.wrong,.missed{color:var(--bad);border-color:color-mix(in oklab,var(--bad) 45%,transparent);background:color-mix(in oklab,var(--bad) 10%,transparent)}
+.missed{text-decoration:line-through}
+.extra{color:var(--ex);border-color:color-mix(in oklab,var(--ex) 45%,transparent);border-style:dashed}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--mut)}
+.legend i{display:inline-block;width:.7rem;height:.7rem;border-radius:3px;margin-right:.35rem;background:currentColor}
+.issue{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.7rem 0;border-top:1px solid var(--line);animation:rise .4s both}
+.issue b{font-family:'Space Grotesk'}.issue small{color:var(--mut);display:block}
+.spark{display:flex;align-items:flex-end;gap:6px;height:64px}
+.spark span{flex:1;background:var(--ac);border-radius:6px 6px 0 0;min-height:4px;transition:height .8s;opacity:.85}
+.tags{display:flex;gap:1rem;color:var(--mut);font-size:.85rem;flex-wrap:wrap}
+details{margin-top:1rem;color:var(--mut)}summary{cursor:pointer}
+.live{min-height:1.6em;color:var(--mut);font-style:italic;margin-top:.75rem;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1>Vox<span>Check</span> 🎙️</h1><p class="sub">Speak a sentence. Get instant word‑level pronunciation feedback BY M.Adeeb Ali Softwer Developer.</p></div>
+    <div class="tags"><span>⚡ Web Speech API</span><span>🔒 100% in‑browser</span></div>
+  </header>
+
+  <section class="grid">
+    <div class="card">
+      <h2>1 · Your target sentence</h2>
+      <textarea id="target" aria-label="Target sentence"></textarea>
+      <div class="row">
+        <button data-lv="Easy">🟢 Easy</button><button data-lv="Medium">🟡 Medium</button><button data-lv="Hard">🔴 Tongue‑twister</button>
+        <button id="hear">🔊 Listen</button><button id="slow">🐢 Slow</button>
+      </div>
+      <select id="lang" aria-label="Accent"><option value="en-US">🇺🇸 American English</option><option value="en-GB">🇬🇧 British English</option><option value="en-IN">🇮🇳 Indian English</option><option value="en-AU">🇦🇺 Australian English</option></select>
+    </div>
+    <div class="card" style="animation-delay:.1s">
+      <h2 style="margin-bottom:.9rem">2 · Record</h2>
+      <button class="mic" id="mic" aria-label="Start or stop recording">🎤</button>
+      <canvas id="wave" width="600" height="140"></canvas>
+      <p class="live" id="live">Tap the mic and read the sentence aloud</p>
+      <details><summary>No microphone? Type what you said</summary>
+        <div class="row"><input id="manual" placeholder="e.g. the rough weather" style="flex:1;background:transparent;color:inherit;border:1px solid var(--line);border-radius:12px;padding:.5rem .8rem;font:inherit"><button id="go">Analyze</button></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="grid" id="result" hidden>
+    <div class="card">
+      <h2>3 · Word‑by‑word analysis</h2>
+      <div class="words" id="words"></div>
+      <div class="legend"><span class="ok"><i></i>Correct</span><span class="close"><i></i>Almost</span><span class="wrong"><i></i>Mispronounced</span><span class="missed"><i></i>Skipped</span><span class="extra"><i></i>Extra</span></div>
+      <div id="issues" style="margin-top:1rem"></div>
+    </div>
+    <div class="card" style="animation-delay:.1s">
+      <div class="score">
+        <svg class="ring" viewBox="0 0 160 160"><circle class="bg" cx="80" cy="80" r="70"/><circle class="fg" id="fg" cx="80" cy="80" r="70"/></svg>
+        <div class="num" id="num">0</div>
+      </div>
+      <p class="verdict" id="verdict"></p>
+      <p class="sub" style="text-align:center;font-size:.85rem" id="conf"></p>
+      <h2 style="margin:1.25rem 0 .6rem;font-size:1rem">📈 Recent attempts</h2>
+      <div class="spark" id="spark"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s), SR = window.SpeechRecognition || window.webkitSpeechRecognition
+const bank = {
+  Easy: ['Please call Stella and ask her to bring these things', 'The weather is lovely this morning', 'I would like a cup of coffee'],
+  Medium: ['The thorough scientist thought through the rough weather', 'Comfortable vegetables are necessary in February', 'The colonel’s choir sang about the island'],
+  Hard: ['She sells seashells by the seashore', 'The sixth sick sheikh’s sixth sheep is sick', 'Entrepreneurs often mispronounce the word pronunciation']
+}
+const norm = s => s.toLowerCase().replace(/’/g, "'").replace(/[^a-z0-9'\s]/g, ' ').split(/\s+/).filter(Boolean)
+const lev = (a, b) => {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)])
+  for (let j = 1; j <= b.length; j++) d[0][j] = j
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] != b[j - 1]))
+  return d[a.length][b.length]
+}
+const sim = (a, b) => lev(a, b) / Math.max(a.length, b.length)
+
+// Word-level alignment (dynamic programming, fuzzy substitution cost)
+function align(t, s) {
+  const n = t.length, m = s.length, D = Array.from({ length: n + 1 }, (_, i) => Array(m + 1).fill(i))
+  for (let j = 0; j <= m; j++) D[0][j] = j
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++)
+    D[i][j] = Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1, D[i - 1][j - 1] + sim(t[i - 1], s[j - 1]))
+  const out = []; let i = n, j = m; const eq = (x, y) => Math.abs(x - y) < 1e-9
+  while (i || j) {
+    if (i && j && eq(D[i][j], D[i - 1][j - 1] + sim(t[i - 1], s[j - 1]))) { out.unshift({ t: t[i - 1], s: s[j - 1], c: sim(t[i - 1], s[j - 1]) }); i--; j-- }
+    else if (i && eq(D[i][j], D[i - 1][j] + 1)) out.unshift({ t: t[--i] })
+    else out.unshift({ s: s[--j] })
+  }
+  return out
+}
+const grade = ({ t, s, c }) => !s ? 'missed' : !t ? 'extra' : c == 0 ? 'ok' : c <= .45 ? 'close' : 'wrong'
+const pts = { ok: 1, close: .6, wrong: .15, missed: 0, extra: 0 }
+
+function analyze(spoken, conf = .9) {
+  const t = norm($('#target').value), s = norm(spoken)
+  if (!t.length || !s.length) return $('#live').textContent = 'Nothing detected — try again, a bit louder.'
+  const items = align(t, s).map(x => ({ ...x, k: grade(x) }))
+  const extras = items.filter(x => x.k == 'extra').length
+  const acc = Math.max(0, items.reduce((a, x) => a + pts[x.k], 0) - extras * .25) / t.length
+  const score = Math.round(100 * Math.min(1, acc) * (.85 + .15 * conf))
+  render(items, score, conf)
+}
+
+function render(items, score, conf) {
+  $('#result').hidden = false
+  $('#words').innerHTML = items.map((x, i) => `<span class="w ${x.k}" style="--i:${i}" title="${x.t ? 'Expected: ' + x.t : ''} ${x.s ? '· Heard: ' + x.s : ''}">${x.t || x.s}</span>`).join('')
+  const bad = items.filter(x => ['wrong', 'close', 'missed'].includes(x.k))
+  $('#issues').innerHTML = bad.length ? '<h2 style="font-size:1rem">🎯 Words to practise</h2>' + bad.map((x, i) => `
+    <div class="issue" style="animation-delay:${i * 80}ms"><div><b>${x.t}</b><small>${x.s ? `You said “${x.s}”` : 'You skipped this word'}</small></div>
+    <span><button data-say="${x.t}">🔊 Hear</button> <button data-say="${x.t}" data-slow>🐢 Slow</button></span></div>`).join('')
+    : '<p class="sub">🎉 Flawless! Try a harder sentence.</p>'
+  $('#fg').style.strokeDashoffset = 440 - 440 * score / 100
+  $('#fg').style.stroke = score > 80 ? 'var(--ok)' : score > 55 ? 'var(--warn)' : 'var(--bad)'
+  $('#verdict').textContent = score > 90 ? '🏆 Excellent — native‑like!' : score > 75 ? '👏 Great, nearly there' : score > 50 ? '💪 Good start, keep practising' : '🌱 Let’s work on the highlighted words'
+  $('#conf').textContent = `Recognizer confidence: ${Math.round(conf * 100)}%`
+  let n = 0; const tick = () => { $('#num').textContent = n; n < score && (n++, requestAnimationFrame(tick)) }; tick()
+  save(score); $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+}
+
+function save(v) {
+  let h = []
+  try { h = JSON.parse(localStorage.getItem('voxcheck') || '[]') } catch {}
+  h = [...h, v].slice(-8)
+  try { localStorage.setItem('voxcheck', JSON.stringify(h)) } catch {}
+  $('#spark').innerHTML = h.map(x => `<span style="height:0" data-h="${x}" title="${x}%"></span>`).join('')
+  requestAnimationFrame(() => $('#spark').querySelectorAll('span').forEach(e => e.style.height = e.dataset.h + '%'))
+}
+
+// Text-to-speech
+const say = (text, rate = 1) => {
+  speechSynthesis.cancel()
+  const u = new SpeechSynthesisUtterance(text); u.lang = $('#lang').value; u.rate = rate; speechSynthesis.speak(u)
+}
+
+// Live waveform
+let ctx, an, raf, stream
+async function wave(on) {
+  const c = $('#wave'), g = c.getContext('2d')
+  if (!on) { cancelAnimationFrame(raf); stream?.getTracks().forEach(t => t.stop()); ctx?.close(); g.clearRect(0, 0, c.width, c.height); return }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    ctx = new AudioContext(); an = ctx.createAnalyser(); an.fftSize = 128
+    ctx.createMediaStreamSource(stream).connect(an)
+    const buf = new Uint8Array(an.frequencyBinCount), col = getComputedStyle(document.documentElement).getPropertyValue('--ac')
+    const draw = () => {
+      an.getByteFrequencyData(buf); g.clearRect(0, 0, c.width, c.height); g.fillStyle = col
+      buf.forEach((v, i) => { const h = Math.max(4, v / 255 * c.height), w = c.width / buf.length; g.beginPath(); g.roundRect(i * w + 2, (c.height - h) / 2, w - 4, h, 4); g.fill() })
+      raf = requestAnimationFrame(draw)
+    }
+    draw(); return true
+  } catch { return false }
+}
+
+// Speech recognition
+let rec, heard = '', conf = .9
+async function toggle() {
+  if (!SR) return $('#live').textContent = '⚠️ Speech recognition isn’t supported here — use Chrome/Edge, or type below.'
+  if (rec) return rec.stop()
+  $('#live').textContent = 'Requesting microphone…'
+  if (!await wave(true)) return $('#live').textContent = '🚫 Microphone blocked. Open the file on localhost or https (not inside a preview frame) and click Allow.'
+  rec = new SR(); rec.lang = $('#lang').value; rec.interimResults = true; heard = ''
+  rec.onstart = () => { $('#mic').classList.add('on'); $('#mic').textContent = '⏹'; $('#live').textContent = 'Listening…' }
+  rec.onresult = e => {
+    const r = [...e.results]; heard = r.map(x => x[0].transcript).join(' ')
+    conf = r.reduce((a, x) => a + x[0].confidence, 0) / r.length || .9
+    $('#live').textContent = '“' + heard + '”'
+  }
+  rec.onerror = e => $('#live').textContent = ({ 'not-allowed': '🚫 Microphone permission denied.', 'service-not-allowed': '🚫 Speech service blocked — open via localhost or https.', network: '🌐 Speech recognition needs an internet connection.', 'no-speech': '🤫 No speech heard — try again.' })[e.error] || 'Error: ' + e.error
+  rec.onend = () => { rec = null; $('#mic').classList.remove('on'); $('#mic').textContent = '🎤'; wave(false); heard && analyze(heard, conf) }
+  rec.start()
+}
+
+// Events
+const pick = lv => { const a = bank[lv]; $('#target').value = a[Math.floor(Math.random() * a.length)] }
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return
+  if (b.dataset.lv) pick(b.dataset.lv)
+  if (b.dataset.say) say(b.dataset.say, 'slow' in b.dataset ? .5 : 1)
+})
+$('#mic').onclick = toggle
+$('#hear').onclick = () => say($('#target').value)
+$('#slow').onclick = () => say($('#target').value, .55)
+$('#go').onclick = () => $('#manual').value && analyze($('#manual').value)
+pick('Medium')
+</script>
+</body>
+</html>
